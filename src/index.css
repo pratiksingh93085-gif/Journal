@@ -229,12 +229,15 @@ body::after {
 .react-calendar__month-view__weekdays abbr { text-decoration: none !important; }
 
 @media (max-width: 768px) {
-  main {
-    margin-left: 0 !important;
-    margin-bottom: 60px !important;
-    padding: 24px 16px !important;
+  .card {
+    padding: 14px 14px;
+    border-radius: 12px;
   }
-  .card { padding: 14px 16px; }
+
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 20px !important; }
+
+  .section-tag { font-size: 9px; }
 }
 #galaxy-bg {
   position: fixed;

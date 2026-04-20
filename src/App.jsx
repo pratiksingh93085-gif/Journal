@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Sidebar from "./components/Sidebar";
@@ -12,6 +12,13 @@ function App() {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") !== "light";
   });
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
 
   const toggleDarkMode = () => {
     setDarkMode(prev => {
@@ -24,20 +31,17 @@ function App() {
   return (
     <div
       className={darkMode ? "" : "light"}
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        background: "var(--bg)",
-        transition: "background 0.3s",
-      }}
+      style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}
     >
-      <Sidebar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <Sidebar darkMode={darkMode} toggleDarkMode={toggleDarkMode} isMobile={isMobile} />
       <main style={{
-        marginLeft: "58px",
+        marginLeft: isMobile ? "0" : "58px",
+        marginBottom: isMobile ? "64px" : "0",
         flex: 1,
-        padding: "32px 40px",
-        maxWidth: "960px",
+        padding: isMobile ? "20px 16px" : "36px 44px",
         width: "100%",
+        maxWidth: "960px",
+        overflowX: "hidden",
       }}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
