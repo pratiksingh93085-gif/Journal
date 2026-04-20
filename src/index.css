@@ -1,0 +1,266 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #06040f;
+  --bg2: #0d0a1a;
+  --bg3: #130f24;
+  --purple: #9b6dff;
+  --purple-dim: #7c4fe0;
+  --purple-muted: #2a1a5e;
+  --purple-border: #3d2a7a;
+  --lavender: #c4a8ff;
+  --border: #1e1640;
+  --border2: #2a1f55;
+  --text: #f0ecff;
+  --text2: #9b87c8;
+  --text3: #4a3d70;
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+.light {
+  --bg: #f8f5ff;
+  --bg2: #f0ebff;
+  --bg3: #e8e0ff;
+  --purple: #6c3fc5;
+  --purple-dim: #5a32a3;
+  --purple-muted: #ede7ff;
+  --purple-border: #c9b8f0;
+  --lavender: #7c4fe0;
+  --border: #ddd4f8;
+  --border2: #c9b8f0;
+  --text: #1e0a3c;
+  --text2: #5a4780;
+  --text3: #9b87c0;
+}
+
+/* body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+} */
+
+/* Galaxy canvas sits fixed behind everything */
+#galaxy-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Everything sits above the galaxy */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--purple-muted); border-radius: 2px; }
+
+input, textarea, select {
+  background: rgba(13, 10, 26, 0.8);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  backdrop-filter: blur(8px);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--purple-border);
+  box-shadow: 0 0 0 3px rgba(108, 63, 197, 0.15);
+}
+
+input::placeholder, textarea::placeholder { color: var(--text3); }
+
+select option {
+  background: var(--bg2);
+  color: var(--text);
+}
+
+button {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 99px;
+  padding: 8px 18px;
+  transition: all 0.2s;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+}
+
+button:hover {
+  background: rgba(42, 26, 94, 0.6);
+  border-color: var(--purple-border);
+  color: var(--text);
+}
+
+button:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(135deg, #7c4fe0, #9b6dff);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(155, 109, 255, 0.35);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #6a3fcc, #8a5fee);
+  color: #fff;
+  box-shadow: 0 6px 24px rgba(155, 109, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.card {
+  background: rgba(13, 10, 26, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(16px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: var(--purple-border);
+  box-shadow: 0 0 30px rgba(155, 109, 255, 0.08);
+}
+
+.section-tag {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 99px;
+  background: var(--purple-muted);
+  color: var(--lavender);
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid var(--purple-border);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up { animation: fadeUp 0.3s ease forwards; }
+
+/* Gloss orb top right */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -150px; right: -100px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(120, 50, 230, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat 8s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -120px; left: -80px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(80, 20, 200, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat 10s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes orbFloat {
+  from { transform: scale(1) translate(0, 0); }
+  to   { transform: scale(1.15) translate(20px, 20px); }
+}
+
+.react-calendar {
+  background: rgba(13, 10, 26, 0.8) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  font-family: var(--font-sans) !important;
+  color: var(--text) !important;
+  width: 100% !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.react-calendar__tile { color: var(--text3) !important; border-radius: 6px !important; font-size: 12px !important; }
+.react-calendar__tile:hover { background: var(--bg3) !important; color: var(--lavender) !important; }
+.react-calendar__tile--active { background: var(--purple) !important; color: #fff !important; font-weight: 700 !important; }
+.react-calendar__tile--now { background: var(--purple-muted) !important; color: var(--lavender) !important; }
+.react-calendar__navigation button { color: var(--text2) !important; background: transparent !important; border: none !important; }
+.react-calendar__navigation button:hover { background: var(--bg3) !important; border-radius: 6px !important; }
+.react-calendar__month-view__weekdays { color: var(--purple) !important; font-size: 11px !important; }
+.react-calendar__month-view__weekdays abbr { text-decoration: none !important; }
+
+@media (max-width: 768px) {
+  main {
+    margin-left: 0 !important;
+    margin-bottom: 60px !important;
+    padding: 24px 16px !important;
+  }
+  .card { padding: 14px 16px; }
+}
+#galaxy-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  background: rgba(13, 10, 26, 0.55) !important;
+  border: 1px solid rgba(61, 42, 122, 0.5) !important;
+  border-radius: 16px !important;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: rgba(155, 109, 255, 0.4) !important;
+  box-shadow: 0 0 30px rgba(155, 109, 255, 0.1);
+}
