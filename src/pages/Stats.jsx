@@ -27,21 +27,9 @@ function Stats() {
           [totalEntries, "entries"],
           [activeDays, "active days"],
         ].map(([num, label]) => (
-          <div key={label} style={{
-            background: "rgba(19, 15, 36, 0.6)",
-            border: "1px solid var(--border2)",
-            borderRadius: "10px", padding: "14px", textAlign: "center",
-            backdropFilter: "blur(12px)",
-          }}>
-            <div style={{
-              fontFamily: "var(--font-serif)", fontSize: "26px",
-              fontWeight: 700, color: "var(--purple)",
-            }}>{num}</div>
-            <div style={{
-              fontSize: "10px", color: "var(--text3)",
-              textTransform: "uppercase", letterSpacing: "0.08em",
-              marginTop: "3px", fontWeight: 600,
-            }}>{label}</div>
+          <div key={label} className="stat-card">
+            <div className="stat-num">{num}</div>
+            <div className="stat-label">{label}</div>
           </div>
         ))}
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { ref, onValue } from "firebase/database";
+import getSessionId from "../utils/getSessionId";
 
 function useStats() {
   const [streak, setStreak] = useState(0);
@@ -8,7 +9,8 @@ function useStats() {
   const [activeDays, setActiveDays] = useState(0);
 
   useEffect(() => {
-    const journalRef = ref(db, "entries");
+    const sessionId = getSessionId();
+    const journalRef = ref(db, `users/${sessionId}/entries`);
 
     onValue(journalRef, (snapshot) => {
       const data = snapshot.val();

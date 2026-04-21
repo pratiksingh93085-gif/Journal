@@ -9,9 +9,7 @@ import Stats from "./pages/Stats";
 
 function App() {
   const location = useLocation();
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") !== "light";
-  });
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") !== "light");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -31,17 +29,23 @@ function App() {
   return (
     <div
       className={darkMode ? "" : "light"}
-      style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        width: "100%",
+        background: "var(--bg)",
+        overflowX: "hidden",
+      }}
     >
       <Sidebar darkMode={darkMode} toggleDarkMode={toggleDarkMode} isMobile={isMobile} />
       <main style={{
         marginLeft: isMobile ? "0" : "58px",
         marginBottom: isMobile ? "64px" : "0",
         flex: 1,
-        padding: isMobile ? "20px 16px" : "36px 44px",
-        width: "100%",
-        maxWidth: "960px",
-        overflowX: "hidden",
+        padding: isMobile ? "20px 16px" : "36px 48px",
+        width: isMobile ? "100%" : "calc(100% - 58px)",
+        minHeight: "100vh",
+        boxSizing: "border-box",
       }}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>

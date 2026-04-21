@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { ref, onValue, remove, update } from "firebase/database";
+import getSessionId from "../utils/getSessionId";
 
 function JournalList({ selectedDate, searchTerm }) {
   const [entries, setEntries] = useState([]);
@@ -8,14 +9,15 @@ function JournalList({ selectedDate, searchTerm }) {
   const [editText, setEditText] = useState("");
   const [editMood, setEditMood] = useState("");
 
+  const sessionId = getSessionId();
+
   useEffect(() => {
-    const journalRef = ref(db, "entries");
+    const journalRef = ref(db, `users/${sessionId}/entries`);
     onValue(journalRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const loadedEntries = Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key],
+          id: key, ...data[key],
         }));
         setEntries(loadedEntries);
       } else {
@@ -25,15 +27,11 @@ function JournalList({ selectedDate, searchTerm }) {
   }, []);
 
   const filteredEntries = entries.filter((item) => {
-    const sameDate =
-      new Date(item.date).toDateString() ===
-      new Date(selectedDate).toDateString();
-    const matchesSearch =
-      item.text.toLowerCase().includes(searchTerm.toLowerCase());
+    const sameDate = new Date(item.date).toDateString() === new Date(selectedDate).toDateString();
+    const matchesSearch = item.text.toLowerCase().includes(searchTerm.toLowerCase());
     return sameDate && matchesSearch;
   });
 
-  // mood color accent map
   const moodAccent = {
     "😊 Happy":  { bg: "#1a1a3d", border: "#4a3f9f", pill: "#9b6dff" },
     "😌 Calm":   { bg: "#0f2a2a", border: "#1f6060", pill: "#4ac8c8" },
@@ -48,18 +46,14 @@ function JournalList({ selectedDate, searchTerm }) {
     Neutral:  { color: "#9b87c8", bg: "#2a1a5e", border: "#2e1f6e" },
   };
 
-  // highlight search term inside text
   const highlightText = (text, term) => {
     if (!term.trim()) return text;
     const parts = text.split(new RegExp(`(${term})`, "gi"));
     return parts.map((part, i) =>
       part.toLowerCase() === term.toLowerCase() ? (
-        <mark key={i} style={{
-          background: "var(--purple-muted)",
-          color: "var(--purple)",
-          borderRadius: "3px",
-          padding: "0 2px",
-        }}>{part}</mark>
+        <mark key={i} style={{ background: "var(--purple-muted)", color: "var(--purple)", borderRadius: "3px", padding: "0 2px" }}>
+          {part}
+        </mark>
       ) : part
     );
   };
@@ -67,7 +61,7 @@ function JournalList({ selectedDate, searchTerm }) {
   const handleDelete = async (id) => {
     const confirmed = window.confirm("Delete this entry?");
     if (!confirmed) return;
-    await remove(ref(db, `entries/${id}`));
+    await remove(ref(db, `users/${sessionId}/entries/${id}`));
   };
 
   const handleEditStart = (item) => {
@@ -77,7 +71,7 @@ function JournalList({ selectedDate, searchTerm }) {
   };
 
   const handleEditSave = async (id) => {
-    await update(ref(db, `entries/${id}`), {
+    await update(ref(db, `users/${sessionId}/entries/${id}`), {
       text: editText,
       mood: editMood,
     });
@@ -92,22 +86,15 @@ function JournalList({ selectedDate, searchTerm }) {
     setEditMood("");
   };
 
-  // ── Empty state ──
   if (filteredEntries.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "48px 24px" }}>
-        <div style={{ fontSize: "48px", marginBottom: "16px" }}>✦</div>
-        <p style={{
-          fontFamily: "var(--font-serif)",
-          fontSize: "18px", fontWeight: 600,
-          color: "var(--text2)", marginBottom: "8px",
-        }}>
+        <div style={{ fontSize: "40px", marginBottom: "16px" }}>✦</div>
+        <p style={{ fontFamily: "var(--font-serif)", fontSize: "18px", fontWeight: 600, color: "var(--text2)", marginBottom: "8px" }}>
           No entries for this day
         </p>
         <p style={{ fontSize: "12px", color: "var(--text3)", lineHeight: 1.7 }}>
-          {searchTerm
-            ? `No entries match "${searchTerm}"`
-            : "Nothing written yet. Start capturing your thoughts."}
+          {searchTerm ? `No entries match "${searchTerm}"` : "Nothing written yet. Start capturing your thoughts."}
         </p>
       </div>
     );
@@ -115,10 +102,7 @@ function JournalList({ selectedDate, searchTerm }) {
 
   return (
     <div>
-      <p style={{
-        fontSize: "11px", color: "var(--text3)",
-        marginBottom: "16px", fontWeight: 500,
-      }}>
+      <p style={{ fontSize: "11px", color: "var(--text3)", marginBottom: "16px", fontWeight: 500 }}>
         {filteredEntries.length} {filteredEntries.length === 1 ? "entry" : "entries"} found
       </p>
 
@@ -137,11 +121,10 @@ function JournalList({ selectedDate, searchTerm }) {
               overflow: "hidden",
               transition: "box-shadow 0.2s",
             }}
-            onMouseEnter={e => e.currentTarget.style.boxShadow = `0 0 20px rgba(155,109,255,0.1)`}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = "0 0 20px rgba(155,109,255,0.1)"}
             onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
           >
             {editingId === item.id ? (
-              // ── Edit mode ──
               <div style={{ padding: "18px 20px" }}>
                 <textarea
                   value={editText}
@@ -161,117 +144,62 @@ function JournalList({ selectedDate, searchTerm }) {
                   <option>😴 Tired</option>
                 </select>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button
-                    onClick={() => handleEditSave(item.id)}
-                    style={{
-                      background: "var(--purple)", color: "#09080f",
-                      border: "none", borderRadius: "99px",
-                      padding: "7px 18px", fontWeight: 600, fontSize: "12px",
-                    }}
-                  >Save</button>
-                  <button
-                    onClick={handleEditCancel}
-                    style={{ padding: "7px 18px", fontSize: "12px" }}
-                  >Cancel</button>
+                  <button onClick={() => handleEditSave(item.id)} style={{
+                    background: "var(--purple)", color: "#09080f",
+                    border: "none", borderRadius: "99px",
+                    padding: "7px 18px", fontWeight: 600, fontSize: "12px",
+                  }}>Save</button>
+                  <button onClick={handleEditCancel} style={{ padding: "7px 18px", fontSize: "12px" }}>Cancel</button>
                 </div>
               </div>
             ) : (
-              // ── View mode ──
               <div>
-                {/* Top accent bar */}
-                <div style={{
-                  height: "3px",
-                  background: accent.pill,
-                  borderRadius: "12px 12px 0 0",
-                }} />
-
+                <div style={{ height: "3px", background: accent.pill, borderRadius: "12px 12px 0 0" }} />
                 <div style={{ padding: "16px 20px" }}>
-                  {/* Header row */}
-                  <div style={{
-                    display: "flex", justifyContent: "space-between",
-                    alignItems: "flex-start", marginBottom: "10px", gap: "8px",
-                  }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px", gap: "8px" }}>
                     <div>
-                      <p style={{
-                        fontSize: "10px", color: "var(--text3)",
-                        fontWeight: 600, letterSpacing: "0.08em",
-                        textTransform: "uppercase", marginBottom: "4px",
-                      }}>
+                      <p style={{ fontSize: "10px", color: "var(--text3)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "4px" }}>
                         {item.date}
                       </p>
                       <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
-                        {/* Mood pill */}
                         <span style={{
                           display: "inline-block", padding: "3px 10px",
                           borderRadius: "99px", fontSize: "11px", fontWeight: 600,
-                          background: "rgba(0,0,0,0.2)",
-                          color: accent.pill,
+                          background: "rgba(0,0,0,0.2)", color: accent.pill,
                           border: `1px solid ${accent.border}`,
-                        }}>
-                          {item.mood}
-                        </span>
-                        {/* Sentiment pill */}
+                        }}>{item.mood}</span>
                         {item.sentiment && (
                           <span style={{
                             display: "inline-block", padding: "3px 10px",
                             borderRadius: "99px", fontSize: "10px", fontWeight: 600,
-                            background: sentiment.bg,
-                            color: sentiment.color,
+                            background: sentiment.bg, color: sentiment.color,
                             border: `1px solid ${sentiment.border}`,
-                          }}>
-                            {item.sentiment}
-                          </span>
+                          }}>{item.sentiment}</span>
                         )}
                       </div>
                     </div>
-
-                    {/* Action buttons */}
                     <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-                      <button
-                        onClick={() => handleEditStart(item)}
-                        style={{
-                          fontSize: "11px", padding: "5px 12px",
-                          borderRadius: "99px",
-                          border: `1px solid ${accent.border}`,
-                          background: "transparent",
-                          color: "var(--text3)",
-                        }}
-                      >Edit</button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        style={{
-                          fontSize: "11px", padding: "5px 12px",
-                          borderRadius: "99px",
-                          border: "1px solid #5a2020",
-                          background: "transparent",
-                          color: "#df5a5a",
-                        }}
-                      >Delete</button>
+                      <button onClick={() => handleEditStart(item)} style={{
+                        fontSize: "11px", padding: "5px 12px", borderRadius: "99px",
+                        border: `1px solid ${accent.border}`, background: "transparent", color: "var(--text3)",
+                      }}>Edit</button>
+                      <button onClick={() => handleDelete(item.id)} style={{
+                        fontSize: "11px", padding: "5px 12px", borderRadius: "99px",
+                        border: "1px solid #5a2020", background: "transparent", color: "#df5a5a",
+                      }}>Delete</button>
                     </div>
                   </div>
-
-                  {/* Entry text */}
                   <p style={{
-                    fontFamily: "var(--font-serif)",
-                    fontSize: "14px", lineHeight: 1.8,
-                    color: "var(--text2)", fontStyle: "italic",
+                    fontFamily: "var(--font-serif)", fontSize: "14px",
+                    lineHeight: 1.8, color: "var(--text2)", fontStyle: "italic",
                     marginBottom: item.photoURL ? "14px" : "0",
-                  }}>
-                    {highlightText(item.text, searchTerm)}
-                  </p>
-
-                  {/* Photo */}
+                  }}>{highlightText(item.text, searchTerm)}</p>
                   {item.photoURL && (
-                    <img
-                      src={item.photoURL}
-                      alt="journal"
-                      style={{
-                        width: "100%", maxHeight: "220px",
-                        objectFit: "cover", borderRadius: "8px",
-                        border: `1px solid ${accent.border}`,
-                        marginTop: "12px",
-                      }}
-                    />
+                    <img src={item.photoURL} alt="journal" style={{
+                      width: "100%", maxHeight: "220px",
+                      objectFit: "cover", borderRadius: "8px",
+                      border: `1px solid ${accent.border}`, marginTop: "12px",
+                    }} />
                   )}
                 </div>
               </div>

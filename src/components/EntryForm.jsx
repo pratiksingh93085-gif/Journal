@@ -3,6 +3,7 @@ import { db, storage } from "../firebase";
 import { ref, push } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { checkGrammar } from "../utils/checkGrammar";
+import getSessionId from "../utils/getSessionId";
 
 function EntryForm() {
   const [entry, setEntry] = useState("");
@@ -47,14 +48,15 @@ function EntryForm() {
     if (!entry.trim()) { alert("Please write something first."); return; }
     setUploading(true);
     try {
+      const sessionId = getSessionId();
       const sentiment = detectSentiment(entry);
       let photoURL = null;
       if (photo) {
-        const pRef = storageRef(storage, `photos/${Date.now()}_${photo.name}`);
+        const pRef = storageRef(storage, `photos/${sessionId}/${Date.now()}_${photo.name}`);
         await uploadBytes(pRef, photo);
         photoURL = await getDownloadURL(pRef);
       }
-      await push(ref(db, "entries"), {
+      await push(ref(db, `users/${sessionId}/entries`), {
         text: entry,
         date: new Date().toLocaleString(),
         mood,
@@ -65,7 +67,9 @@ function EntryForm() {
       setErrors([]);
       setPhoto(null);
       setPhotoPreview(null);
+      alert("Entry saved successfully!");
     } catch (e) {
+      console.error(e);
       alert("Something went wrong. Please try again.");
     } finally {
       setUploading(false);
@@ -91,21 +95,13 @@ function EntryForm() {
         }}
       />
 
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "14px",
-      }}>
+      <div style={{ marginBottom: "14px" }}>
         <span style={{ fontSize: "11px", color: "var(--text3)" }}>
           {words} {words === 1 ? "word" : "words"}
         </span>
       </div>
 
-      <p style={{
-        fontSize: "11px", color: "var(--text3)",
-        marginBottom: "8px", fontWeight: 500,
-      }}>
+      <p style={{ fontSize: "11px", color: "var(--text3)", marginBottom: "8px", fontWeight: 500 }}>
         How are you feeling?
       </p>
 
@@ -123,47 +119,27 @@ function EntryForm() {
               fontSize: "12px",
               transition: "all 0.15s",
             }}
-          >
-            {m}
-          </button>
+          >{m}</button>
         ))}
       </div>
 
       <div style={{ height: "1px", background: "var(--border)", marginBottom: "16px" }} />
 
-      <div style={{
-        display: "flex", gap: "8px",
-        flexWrap: "wrap", alignItems: "center",
-      }}>
-        <button
-          onClick={handleCheckGrammar}
-          style={{ fontSize: "12px", padding: "8px 16px" }}
-        >
+      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+        <button onClick={handleCheckGrammar} style={{ fontSize: "12px", padding: "8px 16px" }}>
           Check grammar
         </button>
 
-        <label
-          htmlFor="photo-upload"
-          style={{
-            display: "inline-flex", alignItems: "center", gap: "6px",
-            padding: "8px 16px",
-            borderRadius: "99px",
-            border: "1px solid var(--border2)",
-            color: photo ? "var(--purple)" : "var(--text2)",
-            cursor: "pointer",
-            fontSize: "12px",
-            transition: "all 0.15s",
-          }}
-        >
+        <label htmlFor="photo-upload" style={{
+          display: "inline-flex", alignItems: "center", gap: "6px",
+          padding: "8px 16px", borderRadius: "99px",
+          border: "1px solid var(--border2)",
+          color: photo ? "var(--purple)" : "var(--text2)",
+          cursor: "pointer", fontSize: "12px",
+        }}>
           📷 {photo ? "Photo added" : "Attach photo"}
         </label>
-        <input
-          id="photo-upload"
-          type="file"
-          accept="image/*"
-          onChange={handlePhotoChange}
-          style={{ display: "none" }}
-        />
+        <input id="photo-upload" type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
 
         <div style={{ flex: 1 }} />
 
@@ -185,25 +161,19 @@ function EntryForm() {
 
       {photoPreview && (
         <div style={{ position: "relative", display: "inline-block", marginTop: "12px" }}>
-          <img
-            src={photoPreview}
-            alt="preview"
-            style={{
-              width: "120px", height: "120px",
-              objectFit: "cover", borderRadius: "8px",
-              border: "1px solid var(--border2)",
-            }}
-          />
+          <img src={photoPreview} alt="preview" style={{
+            width: "120px", height: "120px",
+            objectFit: "cover", borderRadius: "8px",
+            border: "1px solid var(--border2)",
+          }} />
           <button
             onClick={() => { setPhoto(null); setPhotoPreview(null); }}
             style={{
               position: "absolute", top: "4px", right: "4px",
               width: "20px", height: "20px",
-              background: "rgba(0,0,0,0.7)",
-              color: "#fff", border: "none",
-              borderRadius: "50%", fontSize: "10px",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              padding: 0,
+              background: "rgba(0,0,0,0.7)", color: "#fff",
+              border: "none", borderRadius: "50%", fontSize: "10px",
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
             }}
           >✕</button>
         </div>
@@ -211,41 +181,24 @@ function EntryForm() {
 
       {errors.length > 0 && (
         <div style={{ marginTop: "16px" }}>
-          <p style={{
-            fontSize: "11px", color: "var(--text3)",
-            marginBottom: "10px", fontWeight: 600,
-            textTransform: "uppercase", letterSpacing: "0.08em",
-          }}>
+          <p style={{ fontSize: "11px", color: "var(--text3)", marginBottom: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Grammar suggestions
           </p>
           {errors.map((err, i) => (
             <div key={i} style={{
               background: "rgba(42, 26, 94, 0.4)",
               border: "1px solid var(--purple-border)",
-              borderRadius: "8px", padding: "10px 14px",
-              marginBottom: "8px",
+              borderRadius: "8px", padding: "10px 14px", marginBottom: "8px",
             }}>
               <p style={{ fontSize: "12px", color: "var(--text2)", marginBottom: "6px" }}>
-                Incorrect:{" "}
-                <span style={{ color: "#df5a5a" }}>
-                  "{entry.substring(err.offset, err.offset + err.length)}"
-                </span>
+                Incorrect: <span style={{ color: "#df5a5a" }}>"{entry.substring(err.offset, err.offset + err.length)}"</span>
               </p>
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                 {err.suggestions.slice(0, 3).map((s, j) => (
-                  <button
-                    key={j}
-                    onClick={() => applySuggestion(s, err.offset, err.length)}
-                    style={{
-                      padding: "4px 12px", fontSize: "11px",
-                      borderRadius: "99px",
-                      background: "var(--purple-muted)",
-                      border: "1px solid var(--purple-border)",
-                      color: "var(--lavender)",
-                    }}
-                  >
-                    {s}
-                  </button>
+                  <button key={j} onClick={() => applySuggestion(s, err.offset, err.length)} style={{
+                    padding: "4px 12px", fontSize: "11px", borderRadius: "99px",
+                    background: "var(--purple-muted)", border: "1px solid var(--purple-border)", color: "var(--lavender)",
+                  }}>{s}</button>
                 ))}
               </div>
             </div>

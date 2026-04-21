@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { ref, onValue } from "firebase/database";
+import getSessionId from "../utils/getSessionId";
 
 function StreakTracker() {
   const [entryDates, setEntryDates] = useState(new Set());
@@ -9,7 +10,8 @@ function StreakTracker() {
   const [activeDays, setActiveDays] = useState(0);
 
   useEffect(() => {
-    const journalRef = ref(db, "entries");
+    const sessionId = getSessionId();
+    const journalRef = ref(db, `users/${sessionId}/entries`);
 
     onValue(journalRef, (snapshot) => {
       const data = snapshot.val();
@@ -83,17 +85,13 @@ function StreakTracker() {
   };
 
   const monthLabels = getMonthLabels();
-
   const CELL = 10;
   const GAP = 3;
   const WEEK_W = CELL + GAP;
 
   return (
     <div>
-      <div style={{
-        display: "flex", gap: "20px",
-        marginBottom: "16px", flexWrap: "wrap",
-      }}>
+      <div style={{ display: "flex", gap: "20px", marginBottom: "16px", flexWrap: "wrap" }}>
         {[
           [streak, "current streak"],
           [activeDays, "active days"],
@@ -102,8 +100,7 @@ function StreakTracker() {
           <div key={label} style={{ textAlign: "center" }}>
             <div style={{
               fontSize: "22px", fontWeight: 700,
-              color: "var(--purple)",
-              fontFamily: "var(--font-serif)",
+              color: "var(--purple)", fontFamily: "var(--font-serif)",
             }}>{num}</div>
             <div style={{
               fontSize: "10px", color: "var(--text3)",
@@ -117,11 +114,8 @@ function StreakTracker() {
         <div style={{ display: "inline-block", minWidth: "max-content" }}>
 
           <div style={{
-            display: "flex",
-            marginBottom: "4px",
-            marginLeft: "24px",
-            position: "relative",
-            height: "14px",
+            display: "flex", marginBottom: "4px",
+            marginLeft: "24px", position: "relative", height: "14px",
           }}>
             {monthLabels.map(({ label, weekIndex }) => (
               <div
@@ -129,10 +123,8 @@ function StreakTracker() {
                 style={{
                   position: "absolute",
                   left: `${weekIndex * WEEK_W}px`,
-                  fontSize: "10px",
-                  color: "var(--text3)",
-                  fontWeight: 500,
-                  whiteSpace: "nowrap",
+                  fontSize: "10px", color: "var(--text3)",
+                  fontWeight: 500, whiteSpace: "nowrap",
                 }}
               >
                 {label}
@@ -142,47 +134,30 @@ function StreakTracker() {
 
           <div style={{ display: "flex", gap: "2px" }}>
             <div style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: `${GAP}px`,
-              marginRight: "4px",
-              justifyContent: "space-around",
+              display: "flex", flexDirection: "column",
+              gap: `${GAP}px`, marginRight: "4px",
             }}>
               {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
                 <div key={i} style={{
-                  height: `${CELL}px`,
-                  fontSize: "9px",
-                  color: "var(--text3)",
-                  lineHeight: `${CELL}px`,
-                  width: "20px",
-                  textAlign: "right",
-                }}>
-                  {d}
-                </div>
+                  height: `${CELL}px`, fontSize: "9px",
+                  color: "var(--text3)", lineHeight: `${CELL}px`,
+                  width: "20px", textAlign: "right",
+                }}>{d}</div>
               ))}
             </div>
 
             {weeks.map((week, wi) => (
-              <div
-                key={wi}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: `${GAP}px`,
-                }}
-              >
+              <div key={wi} style={{ display: "flex", flexDirection: "column", gap: `${GAP}px` }}>
                 {week.map((day, di) => (
                   <div
                     key={di}
                     title={day.toDateString()}
                     style={{
-                      width: `${CELL}px`,
-                      height: `${CELL}px`,
+                      width: `${CELL}px`, height: `${CELL}px`,
                       borderRadius: "2px",
                       backgroundColor: getColor(day),
-                      transition: "transform 0.1s, background 0.2s",
-                      cursor: "default",
-                      flexShrink: 0,
+                      transition: "transform 0.1s",
+                      cursor: "default", flexShrink: 0,
                     }}
                     onMouseEnter={e => e.target.style.transform = "scale(1.5)"}
                     onMouseLeave={e => e.target.style.transform = "scale(1)"}
@@ -196,9 +171,8 @@ function StreakTracker() {
       </div>
 
       <div style={{
-        display: "flex", alignItems: "center",
-        gap: "5px", marginTop: "10px",
-        justifyContent: "flex-end",
+        display: "flex", alignItems: "center", gap: "5px",
+        marginTop: "10px", justifyContent: "flex-end",
       }}>
         <span style={{ fontSize: "10px", color: "var(--text3)" }}>Less</span>
         <div style={{ width: `${CELL}px`, height: `${CELL}px`, borderRadius: "2px", background: "var(--bg3)" }} />

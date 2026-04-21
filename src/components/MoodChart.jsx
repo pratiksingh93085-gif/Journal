@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import getSessionId from "../utils/getSessionId";
 
 const moodScore = {
   "😊 Happy": 5,
@@ -32,7 +33,7 @@ function MoodChart() {
   const [filter, setFilter] = useState("7"); // "7" or "30" days
 
   useEffect(() => {
-    const journalRef = ref(db, "entries");
+    const journalRef = ref(db, `users/${getSessionId()}/entries`);
 
     onValue(journalRef, (snapshot) => {
       const data = snapshot.val();
@@ -45,14 +46,14 @@ function MoodChart() {
       const days = parseInt(filter);
       const today = new Date();
 
-      // Build a list of the last N days
+      
       const dateRange = Array.from({ length: days }, (_, i) => {
         const d = new Date();
         d.setDate(today.getDate() - (days - 1 - i));
         return d.toDateString();
       });
 
-      // Map entries to their date
+     
       const entriesByDate = {};
       Object.values(data).forEach((item) => {
         const dateStr = new Date(item.date).toDateString();
@@ -62,7 +63,7 @@ function MoodChart() {
         entriesByDate[dateStr].push(moodScore[item.mood] || 3);
       });
 
-      // Build chart data — average mood per day
+     
       const formatted = dateRange.map((dateStr) => {
         const scores = entriesByDate[dateStr];
         const avg = scores
@@ -82,7 +83,7 @@ function MoodChart() {
     });
   }, [filter]);
 
-  // Custom tooltip showing mood emoji instead of number
+  
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length && payload[0].value !== null) {
       const score = Math.round(payload[0].value);
@@ -107,7 +108,7 @@ function MoodChart() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
         <h2 style={{ margin: 0 }}>Mood Trend</h2>
 
-        {/* Filter toggle */}
+        
         <div style={{ display: "flex", gap: "8px" }}>
           <button
             onClick={() => setFilter("7")}
@@ -173,7 +174,7 @@ function MoodChart() {
         </LineChart>
       </ResponsiveContainer>
 
-      {/* Mood legend */}
+      
       <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginTop: "12px", flexWrap: "wrap" }}>
         {Object.entries(moodLabel).reverse().map(([score, label]) => (
           <span key={score} style={{ fontSize: "12px", color: "var(--text-secondary, #666)" }}>

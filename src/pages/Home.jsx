@@ -29,8 +29,7 @@ function Home() {
         fontFamily: "var(--font-serif)", fontSize: "13px", fontStyle: "italic",
         color: "var(--text3)", borderLeft: "2px solid var(--purple-border)",
         padding: "8px 14px", marginBottom: "22px",
-        background: "rgba(19, 15, 36, 0.6)", borderRadius: "0 8px 8px 0",
-        lineHeight: 1.7, backdropFilter: "blur(8px)",
+        borderRadius: "0 8px 8px 0", lineHeight: 1.7,
       }}>
         "The life of every man is a diary in which he means to write one story, and writes another."
       </blockquote>
@@ -61,21 +60,9 @@ function Home() {
           [totalEntries, "entries"],
           [activeDays, "active days"],
         ].map(([num, label]) => (
-          <div key={label} style={{
-            background: "rgba(19, 15, 36, 0.6)",
-            border: "1px solid var(--border2)",
-            borderRadius: "10px", padding: "14px", textAlign: "center",
-            backdropFilter: "blur(12px)",
-          }}>
-            <div style={{
-              fontFamily: "var(--font-serif)", fontSize: "26px",
-              fontWeight: 700, color: "var(--purple)",
-            }}>{num}</div>
-            <div style={{
-              fontSize: "10px", color: "var(--text3)",
-              textTransform: "uppercase", letterSpacing: "0.08em",
-              marginTop: "3px", fontWeight: 600,
-            }}>{label}</div>
+          <div key={label} className="stat-card">
+            <div className="stat-num">{num}</div>
+            <div className="stat-label">{label}</div>
           </div>
         ))}
       </div>
